@@ -1,3 +1,6 @@
 # Ignore images and output folders as these folders are used for testing
 /images/
 /output/
+
+# Ignore mac os files
+.DS_Store

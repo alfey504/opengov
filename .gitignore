@@ -3,4 +3,4 @@
 /output/
 
 # Ignore mac os files
-.DS_Store
+/.DS_Store

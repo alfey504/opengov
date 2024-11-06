@@ -4,7 +4,9 @@ import (
 	"image/color"
 	"math"
 
+	"github.com/alfey504/opengov/models"
 	"github.com/alfey504/opengov/opengov"
+	"github.com/alfey504/opengov/utils"
 )
 
 func Brightness(img opengov.ColorImage, val float64) opengov.ColorImage {
@@ -66,11 +68,23 @@ func Gamma(img opengov.ColorImage, factor float64) opengov.ColorImage {
 }
 
 func Hue(img opengov.ColorImage, factor int) opengov.ColorImage {
-	x, y := img.Size()
-
-	newImg := make([][]color.RGBA, x)
-	for pos := range newImg {
-		newImg[pos] = make([]color.RGBA, y)
+	fn := func(col color.RGBA) color.RGBA {
+		hsl := utils.RGBtoHSL(col)
+		h, s, l := hsl.HSL()
+		h = float64((int(h) + factor) % 360)
+		return models.CreateHSL(h, s, l).ToRGBA()
 	}
+	return img.Apply(fn)
+}
 
+func Saturation(img opengov.ColorImage, factor float64) opengov.ColorImage {
+	fn := func(col color.RGBA) color.RGBA {
+		hsl := utils.RGBtoHSL(col)
+		h, s, l := hsl.HSL()
+		s = max(min(s*(1+factor), 1.0), 0.0)
+		newCol := models.CreateHSL(h, s, l).ToRGBA()
+		newCol.A = col.A
+		return newCol
+	}
+	return img.Apply(fn)
 }

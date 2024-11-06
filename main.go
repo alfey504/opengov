@@ -1,21 +1,56 @@
 package main
 
 import (
-	"fmt"
+	"os"
 
-	"github.com/alfey504/opengov/adjustments"
+	"github.com/alfey504/opengov/blend"
 	"github.com/alfey504/opengov/opengov"
 )
 
 func main() {
-	img, err := opengov.MakeColorImage("images/1.jpg")
+	// fn := func(img opengov.ColorImage) opengov.ColorImage {
+	// 	newImg := adjustments.Saturation(img, 20)
+	// 	return newImg
+	// }
+	// TestFiles(fn)
+	img1, _ := opengov.MakeColorImage("images/3.jpg")
+	img2, _ := opengov.MakeColorImage("images/4.jpg")
+
+	blendedImages := blend.Multiply(img1, img2)
+	blendedImages.SaveImage("output/blended.jpg")
+}
+
+func getFileNames(folder string) ([]string, error) {
+	dirEntry, err := os.ReadDir(folder)
+	if err != nil {
+		return []string{}, err
+	}
+
+	files := make([]string, len(dirEntry))
+	for pos, entry := range dirEntry {
+		println("\nentry name -> " + entry.Name())
+		files[pos] = entry.Name()
+	}
+	return files, nil
+}
+
+func TestFiles(operation func(opengov.ColorImage) opengov.ColorImage) {
+	files, err := getFileNames("images/")
 	if err != nil {
 		panic(err)
 	}
 
-	x, y := img.Size()
-	fmt.Printf("height : %d, width: %d \n", x, y)
-	newImg := adjustments.Gamma(img, 2.0)
-	newImg.SaveImage("output/test_1.jpg")
-
+	for _, file := range files {
+		if file == ".DS_Store" {
+			continue
+		}
+		fileDir := "images/" + file
+		image, err := opengov.MakeColorImage(fileDir)
+		if err != nil {
+			panic(err)
+		}
+		newImage := operation(image)
+		outputDir := "output/" + file
+		newImage.SaveImage(outputDir)
+	}
 }

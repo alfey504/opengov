@@ -17,8 +17,14 @@ func Add(img1, img2 models.RGBAImage) models.RGBAImage {
 func Multiply(img1, img2 models.RGBAImage) models.RGBAImage {
 	fn := func(col1, col2 models.RGBA) models.RGBA {
 		return col1.Combine(col2, func(u1, u2 uint8) uint8 {
-			return uint8((uint16(u1)*uint16(u2) + 127) / 255)
-		})
+			if u1 == 0 {
+				return u2
+			}
+			if u2 == 0 {
+				return u1
+			}
+			return uint8(((uint16(u1) * uint16(u2)) + 175) / 255)
+		}).Clamp()
 	}
 	return Blend(img1, img2, fn)
 }

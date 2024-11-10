@@ -29,6 +29,14 @@ func RGBAfromColor(col color.Color) (RGBA, error) {
 	return CreateRGBA(rgbaCol.R, rgbaCol.G, rgbaCol.B, rgbaCol.A), nil
 }
 
+func (rgba RGBA) Clamp() RGBA {
+	newR := min(255, max(0, rgba.R))
+	newG := min(255, max(0, rgba.G))
+	newB := min(255, max(0, rgba.B))
+	newA := min(255, max(0, rgba.A))
+	return CreateRGBA(newR, newG, newB, newA)
+}
+
 func (rgba RGBA) Apply(op func(uint8) uint8) RGBA {
 	newR := op(rgba.R)
 	newG := op(rgba.G)

@@ -4,19 +4,14 @@ import (
 	"os"
 
 	"github.com/alfey504/opengov/blend"
-	"github.com/alfey504/opengov/opengov"
+	"github.com/alfey504/opengov/models"
 )
 
 func main() {
-	// fn := func(img opengov.ColorImage) opengov.ColorImage {
-	// 	newImg := blend.Inverse(img)
-	// 	return newImg
-	// }
-	// TestFiles(fn)
-	img1, _ := opengov.MakeColorImage("images/3.jpg")
-	img2, _ := opengov.MakeColorImage("images/3.jpg")
+	img1, _ := models.LoadRGBAImage("images/3.jpg")
+	img2, _ := models.LoadRGBAImage("images/5.jpg")
 
-	blendedImages := blend.Divide(img1, img2)
+	blendedImages := blend.Multiply(img1, img2)
 	blendedImages.SaveImage("output/blended.jpg")
 }
 
@@ -34,7 +29,7 @@ func getFileNames(folder string) ([]string, error) {
 	return files, nil
 }
 
-func TestFiles(operation func(opengov.ColorImage) opengov.ColorImage) {
+func TestFiles(operation func(models.RGBAImage) models.RGBAImage) {
 	files, err := getFileNames("images/")
 	if err != nil {
 		panic(err)
@@ -45,7 +40,7 @@ func TestFiles(operation func(opengov.ColorImage) opengov.ColorImage) {
 			continue
 		}
 		fileDir := "images/" + file
-		image, err := opengov.MakeColorImage(fileDir)
+		image, err := models.LoadRGBAImage(fileDir)
 		if err != nil {
 			panic(err)
 		}

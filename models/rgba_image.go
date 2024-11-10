@@ -15,7 +15,7 @@ type RGBAImage struct {
 	len, height int
 }
 
-func MakeColorImage(path string) (RGBAImage, error) {
+func LoadRGBAImage(path string) (RGBAImage, error) {
 	img, err := utils.LoadImage(path)
 	if err != nil {
 		fmt.Printf("Error loading file \n")

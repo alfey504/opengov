@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	_ "image/jpeg"
+	_ "image/png"
 	"os"
 )
 
@@ -33,7 +34,7 @@ func loadImage(path string) (*image.Image, error) {
 		return nil, err
 	}
 
-	if format != "jpeg" {
+	if !(format == "jpeg" || format == "png") {
 		err := fmt.Errorf("unsupported format %s", format)
 		fmt.Println(err.Error())
 		return nil, err

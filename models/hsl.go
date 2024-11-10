@@ -1,7 +1,5 @@
 package models
 
-import "image/color"
-
 type HSL struct {
 	h float64
 	s float64
@@ -20,10 +18,10 @@ func (hsl HSL) HSL() (float64, float64, float64) {
 	return hsl.h, hsl.s, hsl.l
 }
 
-func (hsl HSL) ToRGBA() color.RGBA {
+func (hsl HSL) ToRGBA() RGBA {
 	if hsl.s == 0 {
 		v := uint8(hsl.l * 255)
-		return color.RGBA{v, v, v, 255}
+		return RGBA{v, v, v, 255}
 	}
 
 	hueToRGB := func(p, q, t float64) float64 {
@@ -60,7 +58,7 @@ func (hsl HSL) ToRGBA() color.RGBA {
 	g := hueToRGB(p, q, hsl.h)
 	b := hueToRGB(p, q, hsl.h-1.0/3.0)
 
-	return color.RGBA{
+	return RGBA{
 		R: uint8(r * 255),
 		G: uint8(g * 255),
 		B: uint8(b * 255),

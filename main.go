@@ -9,14 +9,14 @@ import (
 
 func main() {
 	// fn := func(img opengov.ColorImage) opengov.ColorImage {
-	// 	newImg := adjustments.Saturation(img, 20)
+	// 	newImg := blend.Inverse(img)
 	// 	return newImg
 	// }
 	// TestFiles(fn)
 	img1, _ := opengov.MakeColorImage("images/3.jpg")
-	img2, _ := opengov.MakeColorImage("images/4.jpg")
+	img2, _ := opengov.MakeColorImage("images/3.jpg")
 
-	blendedImages := blend.Multiply(img1, img2)
+	blendedImages := blend.Divide(img1, img2)
 	blendedImages.SaveImage("output/blended.jpg")
 }
 

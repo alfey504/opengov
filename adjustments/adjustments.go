@@ -1,15 +1,12 @@
 package adjustments
 
 import (
-	"image/color"
 	"math"
 
 	"github.com/alfey504/opengov/models"
-	"github.com/alfey504/opengov/opengov"
-	"github.com/alfey504/opengov/utils"
 )
 
-func Brightness(img opengov.ColorImage, val float64) opengov.ColorImage {
+func Brightness(img models.RGBAImage, val float64) models.RGBAImage {
 	brightnessFactor := (1 + val)
 
 	brightnessFunction := func(val uint8, factor float64) uint8 {
@@ -17,19 +14,16 @@ func Brightness(img opengov.ColorImage, val float64) opengov.ColorImage {
 		return uint8(b)
 	}
 
-	fn := func(p color.RGBA) color.RGBA {
-		return color.RGBA{
-			R: brightnessFunction(p.R, brightnessFactor),
-			G: brightnessFunction(p.G, brightnessFactor),
-			B: brightnessFunction(p.B, brightnessFactor),
-			A: brightnessFunction(p.A, brightnessFactor),
-		}
+	fn := func(p models.RGBA) models.RGBA {
+		return p.Apply(func(u uint8) uint8 {
+			return brightnessFunction(u, brightnessFactor)
+		})
 	}
 
 	return img.Apply(fn)
 }
 
-func Contrast(img opengov.ColorImage, val float64) opengov.ColorImage {
+func Contrast(img models.RGBAImage, val float64) models.RGBAImage {
 	contrastFactor := (259 * (val + 255)) / (255 * (259 - val))
 
 	contrastFunction := func(val uint8, factor float64) uint8 {
@@ -37,18 +31,15 @@ func Contrast(img opengov.ColorImage, val float64) opengov.ColorImage {
 		return uint8(c)
 	}
 
-	fn := func(p color.RGBA) color.RGBA {
-		return color.RGBA{
-			R: contrastFunction(p.R, contrastFactor),
-			G: contrastFunction(p.G, contrastFactor),
-			B: contrastFunction(p.B, contrastFactor),
-			A: contrastFunction(p.A, contrastFactor),
-		}
+	fn := func(p models.RGBA) models.RGBA {
+		return p.Apply(func(u uint8) uint8 {
+			return contrastFunction(u, contrastFactor)
+		})
 	}
 	return img.Apply(fn)
 }
 
-func Gamma(img opengov.ColorImage, factor float64) opengov.ColorImage {
+func Gamma(img models.RGBAImage, factor float64) models.RGBAImage {
 	gammaCorrection := 1 / factor
 
 	gammaFunction := func(col uint8, factor float64) uint8 {
@@ -56,20 +47,17 @@ func Gamma(img opengov.ColorImage, factor float64) opengov.ColorImage {
 		return uint8(g)
 	}
 
-	fn := func(p color.RGBA) color.RGBA {
-		return color.RGBA{
-			R: gammaFunction(p.R, gammaCorrection),
-			G: gammaFunction(p.G, gammaCorrection),
-			B: gammaFunction(p.B, gammaCorrection),
-			A: gammaFunction(p.A, gammaCorrection),
-		}
+	fn := func(p models.RGBA) models.RGBA {
+		return p.Apply(func(u uint8) uint8 {
+			return gammaFunction(u, gammaCorrection)
+		})
 	}
 	return img.Apply(fn)
 }
 
-func Hue(img opengov.ColorImage, factor int) opengov.ColorImage {
-	fn := func(col color.RGBA) color.RGBA {
-		hsl := utils.RGBtoHSL(col)
+func Hue(img models.RGBAImage, factor int) models.RGBAImage {
+	fn := func(col models.RGBA) models.RGBA {
+		hsl := col.ToHSL()
 		h, s, l := hsl.HSL()
 		h = float64((int(h) + factor) % 360)
 		return models.CreateHSL(h, s, l).ToRGBA()
@@ -77,14 +65,15 @@ func Hue(img opengov.ColorImage, factor int) opengov.ColorImage {
 	return img.Apply(fn)
 }
 
-func Saturation(img opengov.ColorImage, factor float64) opengov.ColorImage {
-	fn := func(col color.RGBA) color.RGBA {
-		hsl := utils.RGBtoHSL(col)
+func Saturation(img models.RGBAImage, factor float64) models.RGBAImage {
+	fn := func(col models.RGBA) models.RGBA {
+		hsl := col.ToHSL()
 		h, s, l := hsl.HSL()
 		s = max(min(s*(1+factor), 1.0), 0.0)
 		newCol := models.CreateHSL(h, s, l).ToRGBA()
 		newCol.A = col.A
 		return newCol
 	}
+
 	return img.Apply(fn)
 }

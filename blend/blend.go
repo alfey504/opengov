@@ -1,6 +1,8 @@
 package blend
 
 import (
+	"sync"
+
 	"github.com/alfey504/opengov/models"
 )
 
@@ -19,16 +21,21 @@ func Blend(
 		newImg[pos] = make([]models.RGBA, y)
 	}
 
+	wg := sync.WaitGroup{}
 	for i := 0; i < x; i++ {
-		for j := 0; j < y; j++ {
-			col1 := img1.At(i, j)
-			col2 := img2.At(i, j)
+		wg.Add(1)
+		go func(i int) {
+			for j := 0; j < y; j++ {
+				col1 := img1.At(i, j)
+				col2 := img2.At(i, j)
 
-			blendCol := blendFunction(col1, col2)
-			newImg[i][j] = blendCol
-		}
+				blendCol := blendFunction(col1, col2)
+				newImg[i][j] = blendCol
+			}
+			wg.Done()
+		}(i)
 	}
-
+	wg.Wait()
 	return models.MakeImageFromVector(newImg)
 
 }

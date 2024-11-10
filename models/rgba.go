@@ -17,6 +17,10 @@ func CreateRGBA(r, g, b, a uint8) RGBA {
 	return RGBA{r, g, b, a}
 }
 
+func (rgba RGBA) RGBA() (uint8, uint8, uint8, uint8) {
+	return rgba.R, rgba.G, rgba.B, rgba.A
+}
+
 func RGBAfromColor(col color.Color) (RGBA, error) {
 	if col == nil {
 		return RGBA{}, fmt.Errorf("color is nil")
@@ -43,8 +47,13 @@ func (rgba RGBA) Combine(rgba2 RGBA, op func(uint8, uint8) uint8) RGBA {
 }
 
 func (rgba RGBA) ToColor() color.Color {
-	colRgba := color.RGBA{rgba.R, rgba.G, rgba.B, rgba.A}
-	return color.RGBAModel.Convert(colRgba).(color.Color)
+	r, g, b, a := rgba.RGBA()
+	return color.RGBA{
+		R: r,
+		G: g,
+		B: b,
+		A: a,
+	}
 }
 
 func (rgba RGBA) ToRGBAf64() RGBAf64 {

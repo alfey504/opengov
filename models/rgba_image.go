@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/jpeg"
 	"os"
+	"sync"
 
 	"github.com/alfey504/opengov/utils"
 )
@@ -13,11 +14,6 @@ type RGBAImage struct {
 	vector      [][]RGBA
 	len, height int
 }
-
-// type GreyImage struct {
-// 	vector      [][]uint8
-// 	len, height int
-// }
 
 func MakeColorImage(path string) (RGBAImage, error) {
 	img, err := utils.LoadImage(path)
@@ -77,12 +73,18 @@ func (img RGBAImage) Apply(operation func(RGBA) RGBA) RGBAImage {
 		newImg[pos] = make([]RGBA, y)
 	}
 
+	wg := sync.WaitGroup{}
 	for i := 0; i < x; i++ {
-		for j := 0; j < y; j++ {
-			p := img.At(i, j)
-			newImg[i][j] = operation(p)
-		}
+		wg.Add(1)
+		go func(i int) {
+			for j := 0; j < y; j++ {
+				p := img.At(i, j)
+				newImg[i][j] = operation(p)
+			}
+			wg.Done()
+		}(i)
 	}
+	wg.Wait()
 	return MakeImageFromVector(newImg)
 }
 

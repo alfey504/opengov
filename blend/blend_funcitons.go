@@ -4,6 +4,8 @@ import (
 	"github.com/alfey504/opengov/models"
 )
 
+/* needs work */
+
 func Add(img1, img2 models.RGBAImage) models.RGBAImage {
 	fn := func(col1, col2 models.RGBA) models.RGBA {
 		newCol := col1.Combine(col2, func(c1, c2 uint8) uint8 {
@@ -17,12 +19,6 @@ func Add(img1, img2 models.RGBAImage) models.RGBAImage {
 func Multiply(img1, img2 models.RGBAImage) models.RGBAImage {
 	fn := func(col1, col2 models.RGBA) models.RGBA {
 		return col1.Combine(col2, func(u1, u2 uint8) uint8 {
-			if u1 == 0 {
-				return u2
-			}
-			if u2 == 0 {
-				return u1
-			}
 			return uint8(((uint16(u1) * uint16(u2)) + 175) / 255)
 		}).Clamp()
 	}
@@ -71,16 +67,6 @@ func Subtract(img1, img2 models.RGBAImage) models.RGBAImage {
 		return col1.Combine(col2, colFn)
 	}
 	return Blend(img1, img2, fn)
-}
-
-func Inverse(img models.RGBAImage) models.RGBAImage {
-	return img.Apply(func(col models.RGBA) models.RGBA {
-		rgbaf64 := col.ToRGBAf64()
-		rgbaf64 = rgbaf64.Apply(func(f float64) float64 {
-			return (1.0 - f)
-		})
-		return rgbaf64.ToRGBA()
-	})
 }
 
 func Divide(img1, img2 models.RGBAImage) models.RGBAImage {

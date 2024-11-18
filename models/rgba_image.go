@@ -120,3 +120,47 @@ func (img RGBAImage) toImage() image.Image {
 	}
 	return newImg
 }
+
+func (img RGBAImage) Convolve(k Kernel) RGBAImage {
+	kernel := k.GetKernel()
+	x, y := img.Size()
+	l, m := k.GetDims()
+	offsetX, offsetY := l/2, m/2
+
+	newImg := make([][]RGBA, x)
+	for pos := range newImg {
+		newImg[pos] = make([]RGBA, y)
+	}
+
+	kernelOperation := func(x, y int) RGBA {
+		newRgba := CreateRGBA(0, 0, 0, 0)
+		for i := 0; i < l; i++ {
+			for j := 0; j < m; j++ {
+				p1 := x - (offsetX - i)
+				p2 := y - (offsetY - j)
+
+				p := img.At(p1, p2)
+				newRgba = newRgba.Combine(p, func(u1, u2 uint8) uint8 {
+					val := float64(u1) + (float64(u2) * kernel[i][j])
+					val = max(0, min(255, val))
+					return uint8(val)
+				})
+			}
+		}
+		return newRgba
+	}
+
+	wg := sync.WaitGroup{}
+	for i := offsetX; i < (x - offsetX); i++ {
+		wg.Add(1)
+		go func(i int) {
+			for j := offsetY; j < (y - offsetY); j++ {
+				newP := kernelOperation(i, j)
+				newImg[i][j] = newP
+			}
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+	return MakeImageFromVector(newImg)
+}

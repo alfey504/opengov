@@ -2,17 +2,26 @@ package main
 
 import (
 	"os"
+	"sync"
 
-	"github.com/alfey504/opengov/blend"
 	"github.com/alfey504/opengov/models"
 )
 
 func main() {
-	img1, _ := models.LoadRGBAImage("images/3.jpg")
-	img2, _ := models.LoadRGBAImage("images/5.jpg")
+	// img1, _ := models.LoadRGBAImage("images/3.jpg")
+	// img2, _ := models.LoadRGBAImage("images/6.png")
 
-	blendedImages := blend.Multiply(img1, img2)
-	blendedImages.SaveImage("output/blended.jpg")
+	// blendedImages := blend.Multiply(img1, img2)
+	// blendedImages.SaveImage("output/blended.jpg")
+
+	TestFiles(func(r models.RGBAImage) models.RGBAImage {
+		kernel, _ := models.CreateKernel([][]float64{
+			{1, 0, -1},
+			{1, 0, -1},
+			{1, 0, -1},
+		})
+		return r.Convolve(kernel)
+	})
 }
 
 func getFileNames(folder string) ([]string, error) {
@@ -34,7 +43,7 @@ func TestFiles(operation func(models.RGBAImage) models.RGBAImage) {
 	if err != nil {
 		panic(err)
 	}
-
+	wg := sync.WaitGroup{}
 	for _, file := range files {
 		if file == ".DS_Store" {
 			continue
@@ -44,8 +53,18 @@ func TestFiles(operation func(models.RGBAImage) models.RGBAImage) {
 		if err != nil {
 			panic(err)
 		}
-		newImage := operation(image)
-		outputDir := "output/" + file
-		newImage.SaveImage(outputDir)
+
+		// newImage := operation(image)
+		// outputDir := "output/" + file
+		// newImage.SaveImage(outputDir)
+
+		wg.Add(1)
+		go func(image models.RGBAImage, file string) {
+			newImage := operation(image)
+			outputDir := "output/" + file
+			newImage.SaveImage(outputDir)
+			wg.Done()
+		}(image, file)
 	}
+	wg.Wait()
 }

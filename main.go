@@ -4,6 +4,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/alfey504/opengov/effects"
 	"github.com/alfey504/opengov/models"
 )
 
@@ -15,12 +16,7 @@ func main() {
 	// blendedImages.SaveImage("output/blended.jpg")
 
 	TestFiles(func(r models.RGBAImage) models.RGBAImage {
-		kernel, _ := models.CreateKernel([][]float64{
-			{1, 0, -1},
-			{1, 0, -1},
-			{1, 0, -1},
-		})
-		return r.Convolve(kernel)
+		return effects.EdgeDetection(r)
 	})
 }
 

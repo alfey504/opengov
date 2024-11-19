@@ -35,3 +35,16 @@ func Sepia(img models.RGBAImage) models.RGBAImage {
 		return models.CreateRGBA(newR, newG, newB, rgba.A)
 	})
 }
+
+func EdgeDetection(img models.RGBAImage) models.RGBAImage {
+	kernelFilter := [][]float64{
+		{1, 0, -1},
+		{1, 0, -1},
+		{1, 0, -1},
+	}
+	kernel, err := models.CreateKernel(kernelFilter)
+	if err != nil {
+		panic(err)
+	}
+	return img.Convolve(kernel)
+}
